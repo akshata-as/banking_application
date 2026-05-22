@@ -261,10 +261,21 @@ input::placeholder{color:#c4cdd8;}
         </div>
         <div class="login-field">
           <label>Password</label>
-          <input id="l-pass" type="password" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()"/>
+<input 
+  id="l-pass" 
+  type="password" 
+  placeholder="Enter your password"
+  onkeydown="if(event.key==='Enter')doLogin()"
+/>
+
         </div>
-        <button class="login-btn" onclick="doLogin()">Sign In →</button>
-        <div class="login-err" id="login-err">Invalid username or password.</div>
+<button 
+  id="login-btn"
+  class="login-btn"
+  onclick="doLogin()"
+>
+  Sign In →
+</button>        <div class="login-err" id="login-err">Invalid username or password.</div>
         <div style="text-align:center;margin-top:16px;">
           <span style="font-size:.8rem;color:rgba(255,255,255,.3);">New user? </span>
           <button onclick="showRegister()" style="background:none;border:none;color:var(--teal);font-size:.8rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;">Create Account →</button>
