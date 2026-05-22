@@ -1024,61 +1024,131 @@ async function doRegister(){
 }
 
 // ── LOGIN ──────────────────────────────────────────────────
-async function doLogin(){
-  const u   = document.getElementById('l-user').value.trim().toLowerCase();
-  const p   = document.getElementById('l-pass').value;
+async function doLogin() {
+
+  const u = document.getElementById('l-user').value.trim().toLowerCase();
+  const p = document.getElementById('l-pass').value;
+
   const err = document.getElementById('login-err');
   err.classList.remove('show');
 
-  if(!u||!p){ err.textContent='Please enter username and password.'; err.classList.add('show'); return; }
+  // Validation
+  if (!u || !p) {
+    err.textContent = 'Please enter username and password';
+    err.classList.add('show');
+    return;
+  }
 
   try {
-    const res = await fetch(USER_BASE+'/login',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ username:u, password:p })
-    });
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.error || 'Invalid credentials');
 
+    // Show loading
+    const loginBtn = document.getElementById('login-btn');
+    if (loginBtn) {
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = 'Signing in...';
+    }
+
+    // API Call
+    const res = await fetch(
+      'https://banking-application-2-m8gm.onrender.com/api/users/login',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: u,
+          password: p
+        })
+      }
+    );
+
+    // Handle non-json response
+    let data;
+
+    try {
+      data = await res.json();
+    } catch {
+      throw new Error('Server returned invalid response');
+    }
+
+    // Login failed
+    if (!res.ok) {
+      throw new Error(data.error || data.message || 'Invalid credentials');
+    }
+
+    // Save logged user
     currentUser = data;
+
+    console.log('Logged in user:', data);
+
+    // Apply UI
     applyRoleAccess(data.role);
     updateUserUI(data);
 
+    // Hide login screen
     const screen = document.getElementById('login-screen');
+
     screen.classList.add('hide');
-    setTimeout(()=>{
-      screen.style.display='none';
-      if(data.role==='user'){
+
+    setTimeout(() => {
+
+      screen.style.display = 'none';
+
+      // USER PANEL
+      if (data.role === 'user') {
+
         goPanel('my-account');
-        if(data.accountId){
-          setTimeout(()=>loadMyAccount(data.accountId), 300);
-        } else {
-          // User has no linked account — show message
-          setTimeout(()=>{
-            document.getElementById('my-balance').textContent = 'No Account';
-            document.getElementById('my-name').textContent    = data.fullName || data.username;
-            document.getElementById('my-accnum').textContent  = 'Not linked';
-            document.getElementById('my-id').textContent      = 'Contact admin';
-            // Show info banner
-            const card = document.getElementById('my-account-card');
-            if(card){
-              const banner = document.createElement('div');
-              banner.style.cssText = 'background:#fffbeb;border-top:1px solid #fde68a;padding:14px 28px;font-size:.85rem;color:#92400e;display:flex;align-items:center;gap:10px;';
-              banner.innerHTML = '<span style="font-size:1.1rem;">⚠️</span> Your account is not linked yet. Please ask your admin to link a bank account to your profile.';
-              card.appendChild(banner);
-            }
+
+        if (data.accountId) {
+
+          setTimeout(() => {
+            loadMyAccount(data.accountId);
           }, 300);
+
+        } else {
+
+          document.getElementById('my-balance').textContent = 'No Account';
+          document.getElementById('my-name').textContent =
+            data.fullName || data.username;
+
+          document.getElementById('my-accnum').textContent =
+            'Not linked';
+
+          document.getElementById('my-id').textContent =
+            'Contact admin';
         }
+
       } else {
+
+        // ADMIN / MANAGER
         loadDashboard();
       }
-    },480);
 
-  } catch(e){
+    }, 400);
+
+    toast('✓ Login successful', 'ok');
+
+  } catch (e) {
+
+    console.error('Login Error:', e);
+
     err.textContent = e.message;
     err.classList.add('show');
-    document.getElementById('l-pass').value='';
+
+    document.getElementById('l-pass').value = '';
+
+    toast('✗ ' + e.message, 'err');
+
+  } finally {
+
+    // Restore button
+    const loginBtn = document.getElementById('login-btn');
+
+    if (loginBtn) {
+      loginBtn.disabled = false;
+      loginBtn.innerHTML = 'Login';
+    }
   }
 }
 
