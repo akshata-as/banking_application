@@ -606,32 +606,6 @@ input::placeholder{color:#c4cdd8;}
 <script>
 
 
-function doLogin() {
-
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-
-    fetch("https://banking-application-2-m8gm.onrender.com/api/login", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            username: username,
-            password: password
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log(data);
-        alert("Login successful");
-    })
-    .catch(error => {
-        console.error(error);
-        alert("Login failed");
-    });
-}
-
 const BASE='https://banking-application-2-m8gm.onrender.com/api/accounts';
 let allAccounts=[],txnLog=[],currentFilter='all',currentPage=1;
 const PAGE_SIZE=8;
